@@ -3,6 +3,6 @@ package com.stardrinks;
 public class Main {
     public static void main(String[] args)
     {
-        Shop stardrinks = new Shop("../resources/drinks.csv", "../resources/beans.csv", "../resources/goodies.csv");
+        Shop stardrinks = new Shop("src/resources/drinks.csv", "src/resources/beans.csv", "src/resources/goodies.csv");
     }
 }
