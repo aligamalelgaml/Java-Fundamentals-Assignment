@@ -11,6 +11,18 @@ public class Product {
         this.endMonth = Month.valueOf(endMonth.toUpperCase());
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public Month getStartMonth() {
+        return startMonth;
+    }
+
+    public Month getEndMonth() {
+        return endMonth;
+    }
+
     @Override
     public String toString() {
         return String.format("%s, valid from: %s to %s", this.name, this.startMonth.toString(), this.endMonth.toString());

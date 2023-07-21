@@ -11,14 +11,28 @@ import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Stream;
 
 public class Shop {
-    Map<ResourceType, List<Product>> store = new HashMap<>();
+    Map<ResourceType, List<Product>> menu = new HashMap<>();
+
+    public void printMenu() {
+        System.out.println("Menu:");
+        System.out.println("=====");
+
+        for (Map.Entry<ResourceType, List<Product>> entry : this.menu.entrySet()) {
+            ResourceType resourceType = entry.getKey();
+            List<Product> products = entry.getValue();
+
+            for (Product product : products) {
+                System.out.println(product);
+            }
+
+            System.out.println();
+        }
+        System.out.println("=====");
+    }
 
     /**
      * Constructor for the Shop class.
@@ -45,7 +59,7 @@ public class Shop {
     private void retrieveStoreData(ResourceType productType, Path path) {
 
         try(Stream<String> lines = Files.lines(path).skip(1)) {
-            List<Product> productList = this.store.computeIfAbsent(productType, k -> new ArrayList<>());
+            List<Product> productList = this.menu.computeIfAbsent(productType, k -> new ArrayList<>());
 
             lines.map(line -> line.split(","))
                     .forEach(fields -> {
@@ -54,14 +68,11 @@ public class Shop {
                         String endMonth = fields[2];
 
                         switch (productType) {
-                            case DRINK -> productList.add(new Drink(name, startMonth, endMonth));
-                            case GOODIE -> productList.add(new Goodie(name, startMonth, endMonth));
-                            case BEAN -> productList.add(new Bean(name, startMonth, endMonth));
+                            case DRINKS -> productList.add(new Drink(name, startMonth, endMonth));
+                            case GOODIES -> productList.add(new Goodie(name, startMonth, endMonth));
+                            case BEANS -> productList.add(new Bean(name, startMonth, endMonth));
                         }
                     });
-
-            System.out.println(this.store);
-
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -95,7 +106,7 @@ public class Shop {
                 throw new IllegalArgumentException("Invalid goodies resource path!");
             }
 
-            return Map.of(ResourceType.DRINK, drinksResourcePath, ResourceType.BEAN, beansResourcePath, ResourceType.GOODIE, goodiesResourcePath);
+            return Map.of(ResourceType.DRINKS, drinksResourcePath, ResourceType.BEANS, beansResourcePath, ResourceType.GOODIES, goodiesResourcePath);
         } catch (InvalidPathException e) {
             throw new IllegalArgumentException("Invalid path format: " + e.getMessage());
         }
