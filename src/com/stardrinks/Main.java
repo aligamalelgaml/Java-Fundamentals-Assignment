@@ -4,6 +4,7 @@ public class Main {
     public static void main(String[] args)
     {
         Shop stardrinks = new Shop("src/resources/drinks.csv", "src/resources/beans.csv", "src/resources/goodies.csv");
-        stardrinks.printMenu();
+        ShopUI storefront = new ShopUI(stardrinks);
+        storefront.start();
     }
 }

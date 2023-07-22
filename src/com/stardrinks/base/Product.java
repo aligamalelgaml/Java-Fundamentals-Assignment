@@ -1,5 +1,6 @@
 package com.stardrinks.base;
 import java.time.Month;
+import java.util.Objects;
 
 public class Product {
     private final String name;
@@ -21,6 +22,19 @@ public class Product {
 
     public Month getEndMonth() {
         return endMonth;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Product product = (Product) o;
+        return Objects.equals(name, product.name) && startMonth == product.startMonth && endMonth == product.endMonth;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, startMonth, endMonth);
     }
 
     @Override

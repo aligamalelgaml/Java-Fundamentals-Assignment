@@ -6,6 +6,8 @@ import com.stardrinks.models.Bean;
 import com.stardrinks.models.Drink;
 import com.stardrinks.models.Goodie;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
@@ -16,22 +18,10 @@ import java.util.stream.Stream;
 
 public class Shop {
     Map<ResourceType, List<Product>> menu = new HashMap<>();
+    Set<Product> favourites = new HashSet<>();
 
-    public void printMenu() {
-        System.out.println("Menu:");
-        System.out.println("=====");
-
-        for (Map.Entry<ResourceType, List<Product>> entry : this.menu.entrySet()) {
-            ResourceType resourceType = entry.getKey();
-            List<Product> products = entry.getValue();
-
-            for (Product product : products) {
-                System.out.println(product);
-            }
-
-            System.out.println();
-        }
-        System.out.println("=====");
+    public Map<ResourceType, List<Product>> getMenu() {
+        return Collections.unmodifiableMap(this.menu);
     }
 
     /**
@@ -45,15 +35,52 @@ public class Shop {
      */
     public Shop(String... paths) {
         try {
-            Map<ResourceType, Path> dataPaths = verifyPaths(paths);
+            Map<ResourceType, Path> dataPaths = getVerifiedResourcesPaths(paths);
 
-            if (!dataPaths.isEmpty())
+            if (!dataPaths.isEmpty()) {
                 dataPaths.forEach(this::retrieveStoreData);
+                this.retrieveFavouriteData();
+            }
         } catch (IllegalArgumentException e) {
             System.err.println(e.getMessage());
             e.printStackTrace();
         }
+    }
 
+    public void addFavourite(ResourceType productType, Product product) {
+        String newProduct = String.format("%s,%s,%s,%s", productType.toString(), product.getName(), product.getStartMonth(), product.getEndMonth());
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("src/resources/favourites.csv", true))) {
+            writer.write("\n" + newProduct);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        this.retrieveFavouriteData();
+    }
+
+    private void retrieveFavouriteData() {
+        try(Stream<String> lines = Files.lines(Path.of("src/resources/favourites.csv")).skip(1)) {
+            lines.map(line -> line.split(",")).forEach(fields -> {
+                ResourceType type = ResourceType.valueOf(fields[0]);
+                String name = fields[1];
+                String startMonth = fields[2];
+                String endMonth = fields[3];
+
+                switch (type) {
+                    case DRINKS -> this.favourites.add(new Drink(name, startMonth, endMonth));
+                    case GOODIES -> this.favourites.add(new Goodie(name, startMonth, endMonth));
+                    case BEANS -> this.favourites.add(new Bean(name, startMonth, endMonth));
+                }
+            });
+        } catch (Exception e) {
+            System.err.println("Invalid line format at favourites.csv!");
+            e.printStackTrace();
+        }
+    }
+
+    public Set<Product> getFavourites() {
+        return Collections.unmodifiableSet(favourites);
     }
 
     private void retrieveStoreData(ResourceType productType, Path path) {
@@ -89,7 +116,7 @@ public class Shop {
      * @return A list of Path objects for the valid resource paths.
      * @throws IllegalArgumentException if any of the paths are invalid or not as expected.
      */
-    private Map<ResourceType, Path> verifyPaths(String[] dataPaths) throws IllegalArgumentException {
+    private Map<ResourceType, Path> getVerifiedResourcesPaths(String[] dataPaths) throws IllegalArgumentException {
         try {
             Path drinksResourcePath = Paths.get(dataPaths[0]);
             if (!drinksResourcePath.getFileName().toString().equals("drinks.csv")) {
