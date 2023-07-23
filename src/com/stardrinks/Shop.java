@@ -17,6 +17,9 @@ import java.util.*;
 import java.util.stream.Stream;
 
 public class Shop {
+    private static final String DRINKS_FILE_NAME = "drinks.csv";
+    private static final String BEANS_FILE_NAME = "beans.csv";
+    private static final String GOODIES_FILE_NAME = "goodies.csv";
     Map<ResourceType, List<Product>> menu = new HashMap<>();
     Set<Product> favourites = new HashSet<>();
 
@@ -47,16 +50,22 @@ public class Shop {
         }
     }
 
+    /**
+     * Writes new favourite product to favourites.csv and calls the method to update the internal arraylist containing all favourite products.
+     * @param productType The type of the product being added to the favourites.
+     * @param product Data of product being added to favourites.
+     */
     public void addFavourite(ResourceType productType, Product product) {
         String newProduct = String.format("%s,%s,%s,%s", productType.toString(), product.getName(), product.getStartMonth(), product.getEndMonth());
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("src/resources/favourites.csv", true))) {
             writer.write("\n" + newProduct);
         } catch (IOException e) {
+            System.err.println("Error writing favourite product to favourite.csv!");
             e.printStackTrace();
         }
 
-        this.retrieveFavouriteData();
+        this.retrieveFavouriteData(); // Updates internal arraylist containing favourite items after writing new items.
     }
 
     private void retrieveFavouriteData() {
@@ -119,17 +128,17 @@ public class Shop {
     private Map<ResourceType, Path> getVerifiedResourcesPaths(String[] dataPaths) throws IllegalArgumentException {
         try {
             Path drinksResourcePath = Paths.get(dataPaths[0]);
-            if (!drinksResourcePath.getFileName().toString().equals("drinks.csv")) {
+            if (!drinksResourcePath.getFileName().toString().equals(DRINKS_FILE_NAME)) {
                 throw new IllegalArgumentException("Invalid drinks resource path!");
             }
 
             Path beansResourcePath = Paths.get(dataPaths[1]);
-            if (!beansResourcePath.getFileName().toString().equals("beans.csv")) {
+            if (!beansResourcePath.getFileName().toString().equals(BEANS_FILE_NAME)) {
                 throw new IllegalArgumentException("Invalid beans resource path!");
             }
 
             Path goodiesResourcePath = Paths.get(dataPaths[2]);
-            if (!goodiesResourcePath.getFileName().toString().equals("goodies.csv")) {
+            if (!goodiesResourcePath.getFileName().toString().equals(GOODIES_FILE_NAME)) {
                 throw new IllegalArgumentException("Invalid goodies resource path!");
             }
 
